@@ -1,16 +1,18 @@
-#include<stdio.h>
+#include <stdio.h>
 
 // First Fit Allocation
 void firstfit(int p_size[], int n, int m_size[], int m) {
     printf("\t\tFIRST FIT \n");
-    int i, j, flag;
-    for(i = 0; i < n; i++) {
-        flag = 0;
-        for(j = 0; j < m; j++) {
-            if(m_size[j] >= p_size[i]) {
-                printf("%d ALLOCATED IN %d MEMORY BLOCK", p_size[i], m_size[j]);
-                m_size[j] = m_size[j] - p_size[i];
-                printf(" => %d SPACE REMAINING \n", m_size[j]);
+    int m_temp[m];
+    for (int i = 0; i < m; i++) m_temp[i] = m_size[i]; // Copy memory block sizes
+    
+    for(int i = 0; i < n; i++) {
+        int flag = 0;
+        for(int j = 0; j < m; j++) {
+            if(m_temp[j] >= p_size[i]) {
+                printf("%d ALLOCATED IN %d MEMORY BLOCK", p_size[i], m_temp[j]);
+                m_temp[j] -= p_size[i];
+                printf(" => %d SPACE REMAINING \n", m_temp[j]);
                 flag = 1;
                 break;
             }
@@ -24,20 +26,20 @@ void firstfit(int p_size[], int n, int m_size[], int m) {
 // Worst Fit Allocation
 void worstfit(int p_size[], int n, int m_size[], int m) {
     printf("\t\tWORST FIT \n");
-    int i, j, max, loc;
-    for(i = 0; i < n; i++) {
-        max = m_size[0];
-        loc = 0;
-        for(j = 0; j < m; j++) {
-            if(m_size[j] > max) {
-                max = m_size[j];
+    int m_temp[m];
+    for (int i = 0; i < m; i++) m_temp[i] = m_size[i]; // Copy memory block sizes
+    
+    for(int i = 0; i < n; i++) {
+        int max = -1, loc = -1;
+        for(int j = 0; j < m; j++) {
+            if(m_temp[j] >= p_size[i] && (loc == -1 || m_temp[j] > m_temp[loc])) {
                 loc = j;
             }
         }
-        if(max >= p_size[i]) {
-            printf("%d ALLOCATED IN %d MEMORY BLOCK", p_size[i], m_size[loc]);
-            m_size[loc] = m_size[loc] - p_size[i];
-            printf(" => %d SPACE REMAINING \n", m_size[loc]);
+        if(loc != -1) {
+            printf("%d ALLOCATED IN %d MEMORY BLOCK", p_size[i], m_temp[loc]);
+            m_temp[loc] -= p_size[i];
+            printf(" => %d SPACE REMAINING \n", m_temp[loc]);
         } else {
             printf("%d CANNOT BE ALLOCATED \n", p_size[i]);
         }
@@ -47,22 +49,20 @@ void worstfit(int p_size[], int n, int m_size[], int m) {
 // Best Fit Allocation
 void bestfit(int p_size[], int n, int m_size[], int m) {
     printf("\t\tBEST FIT \n");
-    int i, j, loc;
-    for(i = 0; i < n; i++) {
-        loc = -1;
-        for(j = 0; j < m; j++) {
-            if(m_size[j] >= p_size[i]) {
-                if(loc == -1) {
-                    loc = j;
-                } else if(m_size[loc] > m_size[j]) {
-                    loc = j;
-                }
+    int m_temp[m];
+    for (int i = 0; i < m; i++) m_temp[i] = m_size[i]; // Copy memory block sizes
+    
+    for(int i = 0; i < n; i++) {
+        int loc = -1;
+        for(int j = 0; j < m; j++) {
+            if(m_temp[j] >= p_size[i] && (loc == -1 || m_temp[j] < m_temp[loc])) {
+                loc = j;
             }
         }
         if(loc != -1) {
-            printf("%d ALLOCATED IN %d MEMORY BLOCK", p_size[i], m_size[loc]);
-            m_size[loc] = m_size[loc] - p_size[i];
-            printf(" => %d SPACE REMAINING \n", m_size[loc]);
+            printf("%d ALLOCATED IN %d MEMORY BLOCK", p_size[i], m_temp[loc]);
+            m_temp[loc] -= p_size[i];
+            printf(" => %d SPACE REMAINING \n", m_temp[loc]);
         } else {
             printf("%d CANNOT BE ALLOCATED \n", p_size[i]);
         }
@@ -70,27 +70,52 @@ void bestfit(int p_size[], int n, int m_size[], int m) {
 }
 
 // Main function
-void main() {
-    int i, p_size[100], m_size[100], n, m;
+int main() {
+    int i, n, m;
     
-    // Input: Number of processes and their sizes
     printf("ENTER THE NUMBER OF PROCESSES: ");
     scanf("%d", &n);
+    int p_size[n];
     printf("ENTER THE ARRAY OF PROCESS SIZES: ");
     for(i = 0; i < n; i++) {
         scanf("%d", &p_size[i]);
     }
     
-    // Input: Number of memory blocks and their sizes
     printf("ENTER THE NUMBER OF MEMORY BLOCKS: ");
     scanf("%d", &m);
+    int m_size[m];
     printf("ENTER THE ARRAY OF MEMORY BLOCK SIZES: ");
     for(i = 0; i < m; i++) {
         scanf("%d", &m_size[i]);
     }
     
-    // Call the allocation functions
     firstfit(p_size, n, m_size, m);
     bestfit(p_size, n, m_size, m);
     worstfit(p_size, n, m_size, m);
+    
+    return 0;
 }
+
+/*OUTPUT
+ENTER THE NUMBER OF PROCESSES: 4
+ENTER THE ARRAY OF PROCESS SIZES: 357 210 468 491
+ENTER THE NUMBER OF MEMORY BLOCKS: 6
+ENTER THE ARRAY OF MEMORY BLOCK SIZES: 200 400 600 500 300 250
+		FIRST FIT 
+357 ALLOCATED IN 400 MEMORY BLOCK => 43 SPACE REMAINING 
+210 ALLOCATED IN 600 MEMORY BLOCK => 390 SPACE REMAINING 
+468 ALLOCATED IN 500 MEMORY BLOCK => 32 SPACE REMAINING 
+491 CANNOT BE ALLOCATED 
+		BEST FIT 
+357 ALLOCATED IN 400 MEMORY BLOCK => 43 SPACE REMAINING 
+210 ALLOCATED IN 250 MEMORY BLOCK => 40 SPACE REMAINING 
+468 ALLOCATED IN 500 MEMORY BLOCK => 32 SPACE REMAINING 
+491 ALLOCATED IN 600 MEMORY BLOCK => 109 SPACE REMAINING 
+		WORST FIT 
+357 ALLOCATED IN 600 MEMORY BLOCK => 243 SPACE REMAINING 
+210 ALLOCATED IN 500 MEMORY BLOCK => 290 SPACE REMAINING 
+468 CANNOT BE ALLOCATED 
+491 CANNOT BE ALLOCATED 
+
+
+=== Code Execution Successful ===*/
