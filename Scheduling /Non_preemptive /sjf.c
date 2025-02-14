@@ -1,129 +1,87 @@
 #include <stdio.h>
-#include <limits.h>
-
-void findWaitingTime(int processes[], int n, int bt[], float at[], int wt[], int ct[], int start[]) {
-    int completed[n], completedCount = 0;
-    float currentTime = 0;
-    for (int i = 0; i < n; i++) completed[i] = 0;
-    
-    while (completedCount < n) {
-        int minIndex = -1, minBurst = INT_MAX;
-        
-        for (int i = 0; i < n; i++) {
-            if (!completed[i] && at[i] <= currentTime && bt[i] < minBurst) {
-                minBurst = bt[i];
-                minIndex = i;
-            }
-        }
-        
-        if (minIndex == -1) {
-            currentTime++;
-        } else {
-            start[minIndex] = currentTime;
-            wt[minIndex] = currentTime - at[minIndex];
-            currentTime += bt[minIndex];
-            ct[minIndex] = currentTime;
-            completed[minIndex] = 1;
-            completedCount++;
-        }
-    }
-}
-
-void findTurnAroundTime(int processes[], int n, int bt[], int wt[], int tat[]) {
-    for (int i = 0; i < n; i++) {
-        tat[i] = bt[i] + wt[i];
-    }
-}
-
-void findAvgTime(int processes[], int n, int bt[], float at[]) {
-    int wt[n], tat[n], ct[n], start[n];
-    findWaitingTime(processes, n, bt, at, wt, ct, start);
-    findTurnAroundTime(processes, n, bt, wt, tat);
-
-    int total_wt = 0, total_tat = 0;
-    printf("\nProcess\tArrival Time\tBurst Time\tWaiting Time\tTurnaround Time\tCompletion Time\n");
-    for (int i = 0; i < n; i++) {
-        total_wt += wt[i];
-        total_tat += tat[i];
-        printf("%d\t\t%.1f\t\t%d\t\t%d\t\t%d\t\t%d\n", processes[i], at[i], bt[i], wt[i], tat[i], ct[i]);
-    }
-    printf("\nAverage Waiting Time: %.2f", (float)total_wt / n);
-    printf("\nAverage Turnaround Time: %.2f\n", (float)total_tat / n);
-}
-
-void printGanttChart(int processes[], int n, int bt[], float at[]) {
-    int completed[n], completedCount = 0, start[n], ct[n];
-    float currentTime = 0;
-    for (int i = 0; i < n; i++) completed[i] = 0;
-    
-    printf("\nGantt Chart:\n|");
-    while (completedCount < n) {
-        int minIndex = -1, minBurst = INT_MAX;
-        
-        for (int i = 0; i < n; i++) {
-            if (!completed[i] && at[i] <= currentTime && bt[i] < minBurst) {
-                minBurst = bt[i];
-                minIndex = i;
-            }
-        }
-        
-        if (minIndex == -1) {
-            currentTime++;
-        } else {
-            start[minIndex] = currentTime;
-            currentTime += bt[minIndex];
-            ct[minIndex] = currentTime;
-            completed[minIndex] = 1;
-            completedCount++;
-            printf(" P%d |", processes[minIndex]);
-        }
-    }
-    printf("\n");
-}
 
 int main() {
     int n;
     printf("Enter the number of processes: ");
     scanf("%d", &n);
     
-    int processes[n], burst_time[n];
-    float arrival_time[n];
+    int processes[n], burst_time[n], waiting_time[n], turnaround_time[n], completion_time[n], completed[n], start[n];
+    float arrival_time[n], currentTime = 0;
+    
     printf("Enter arrival times and burst times for each process:\n");
     for (int i = 0; i < n; i++) {
         processes[i] = i + 1;
+        completed[i] = 0;
         printf("Arrival time for Process %d: ", processes[i]);
         scanf("%f", &arrival_time[i]);
         printf("Burst time for Process %d: ", processes[i]);
         scanf("%d", &burst_time[i]);
     }
     
-    printGanttChart(processes, n, burst_time, arrival_time);
-    findAvgTime(processes, n, burst_time, arrival_time);
+    int completedCount = 0;
+    printf("\nGantt Chart:\n|");
+    
+    while (completedCount < n) {
+        int minIndex = -1;
+        int minBurst = 1e9;
+        
+        for (int i = 0; i < n; i++) {
+            if (!completed[i] && arrival_time[i] <= currentTime && burst_time[i] < minBurst) {
+                minBurst = burst_time[i];
+                minIndex = i;
+            }
+        }
+        
+        if (minIndex == -1) {
+            currentTime++;
+        } else {
+            start[minIndex] = currentTime;
+            waiting_time[minIndex] = currentTime - arrival_time[minIndex];
+            currentTime += burst_time[minIndex];
+            completion_time[minIndex] = currentTime;
+            turnaround_time[minIndex] = burst_time[minIndex] + waiting_time[minIndex];
+            completed[minIndex] = 1;
+            completedCount++;
+            printf(" P%d |", processes[minIndex]);
+        }
+    }
+    
+    int total_wt = 0, total_tat = 0;
+    printf("\n\nProcess\tArrival Time\tBurst Time\tWaiting Time\tTurnaround Time\tCompletion Time\n");
+    for (int i = 0; i < n; i++) {
+        total_wt += waiting_time[i];
+        total_tat += turnaround_time[i];
+        printf("%d\t\t%.1f\t\t%d\t\t%d\t\t%d\t\t%d\n", processes[i], arrival_time[i], burst_time[i], waiting_time[i], turnaround_time[i], completion_time[i]);
+    }
+    
+    printf("\nAverage Waiting Time: %.2f", (float)total_wt / n);
+    printf("\nAverage Turnaround Time: %.2f\n", (float)total_tat / n);
     
     return 0;
 }
 
 
+
 /*OUTPUT
-Enter the number of processes: 3
+Enter the number of processes: 4
 Enter arrival times and burst times for each process:
 Arrival time for Process 1: 0
 Burst time for Process 1: 7
-Arrival time for Process 2: 0
-Burst time for Process 2: 3
-Arrival time for Process 3: 0
-Burst time for Process 3: 4
+Arrival time for Process 2: 2
+Burst time for Process 2: 4
+Arrival time for Process 3: 4
+Burst time for Process 3: 1
+Arrival time for Process 4: 5
+Burst time for Process 4: 4
 
 Gantt Chart:
-| P2 | P3 | P1 |
+| P1 | P3 | P2 | P4 |
 
-Process	 Arrival Time	Burst Time	Waiting Time	Turnaround Time	Completion Time
-1		0.0		7		7		14		14
-2		0.0		3		0		3		3
-3		0.0		4		3		7		7
+Process	Arrival Time	Burst Time	Waiting Time	Turnaround Time	Completion Time
+1		0.0		7		0		7		7
+2		2.0		4		6		10		12
+3		4.0		1		3		4		8
+4		5.0		4		7		11		16
 
-Average Waiting Time: 3.33
-Average Turnaround Time: 8.00
-
-
-=== Code Execution Successful ===*/
+Average Waiting Time: 4.00
+Average Turnaround Time: 8.00*/
