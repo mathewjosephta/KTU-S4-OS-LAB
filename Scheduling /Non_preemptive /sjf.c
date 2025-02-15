@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <limits.h>  // Include limits.h for INT_MAX
 
 // Main function
 int main() {
@@ -29,7 +30,7 @@ int main() {
     // Scheduling using Shortest Job Next (SJN)
     while (completedCount < n) {
         int minIndex = -1;  // Index of the process with the shortest burst time
-        int minBurst = 1e9;  // Set initial burst time to a large value
+        int minBurst = INT_MAX;  // Use INT_MAX instead of a large value
         
         // Find the shortest available process
         for (int i = 0; i < n; i++) {
