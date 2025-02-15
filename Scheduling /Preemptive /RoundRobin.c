@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 void main() {
-    int number_of_processes, time_slice, i, j, completed_processes = 0, current_time = 0;
+    int number_of_processes, time_quantum, i, j, completed_processes = 0, current_time = 0;
     int total_waiting_time = 0, total_turnaround_time = 0;
 
     char process_name[10][20]; // Process names (Full names allowed)
@@ -22,7 +22,7 @@ void main() {
     }
 
     // Input time slice (quantum time)
-    printf("\nEnter the time slice: ");
+    printf("\nEnter the time_quantum: ");
     scanf("%d", &time_slice);
 
     // Sorting processes based on arrival time using simple swapping
@@ -52,7 +52,7 @@ void main() {
     while(completed_processes < number_of_processes) {
         for(i = 0; i < number_of_processes; i++) {
             if(arrival_time[i] <= current_time && remaining_time[i] > 0) {  
-                if(remaining_time[i] <= time_slice) {  
+                if(remaining_time[i] <= time_quantum) {  
                     current_time += remaining_time[i];
                     printf("%s-->(%d) ", process_name[i], current_time);
                     remaining_time[i] = 0;  
@@ -60,8 +60,8 @@ void main() {
                     waiting_time[i] = turnaround_time[i] - burst_time[i];  
                     completed_processes++;  
                 } else {  
-                    current_time += time_slice;
-                    remaining_time[i] -= time_slice;
+                    current_time += time_quantum;
+                    remaining_time[i] -= time_quantum;
                     printf("%s-->(%d) ", process_name[i], current_time);
                 }
             }
