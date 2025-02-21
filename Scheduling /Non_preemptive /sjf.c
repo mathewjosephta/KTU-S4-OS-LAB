@@ -16,6 +16,17 @@ int main() {
         scanf("%d %d", &arrivalTime[i], &burstTime[i]);
     }
 
+    // Sorting by Arrival Time
+    for (i = 0; i < n - 1; i++) {
+        for (j = 0; j < n - i - 1; j++) {
+            if (arrivalTime[j] > arrivalTime[j + 1]) {
+                temp = arrivalTime[j]; arrivalTime[j] = arrivalTime[j + 1]; arrivalTime[j + 1] = temp;
+                temp = burstTime[j]; burstTime[j] = burstTime[j + 1]; burstTime[j + 1] = temp;
+                temp = id[j]; id[j] = id[j + 1]; id[j + 1] = temp;
+            }
+        }
+    }
+
     int currentTime = 0, completed = 0;
 
     printf("\nGantt Chart:\n|");
