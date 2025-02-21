@@ -10,12 +10,13 @@ sum=$((n + m))
 echo "The sum is: $sum"
 
 
-: <<EOF
+: <<'COMMENT'
+
 SAMPLE OUTPUT
 
 Enter the first number: 10
 Enter the second number: 20
 The sum is: 30
 
-EOF
+COMMENT
 
