@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 int main() {
-    int n, i;
+    int n, i, j, temp;
     int id[20], arrivalTime[20], burstTime[20];
     int completionTime[20], turnAroundTime[20], waitingTime[20];
     float totalTurnAroundTime = 0, totalWaitingTime = 0;
@@ -16,18 +16,38 @@ int main() {
         scanf("%d %d", &arrivalTime[i], &burstTime[i]);
     }
 
-    // Calculate Completion Time
-    completionTime[0] = arrivalTime[0] + burstTime[0];
+    // Sorting by Arrival Time (Bubble Sort inside main)
+    for (i = 0; i < n - 1; i++) {
+        for (j = 0; j < n - i - 1; j++) {
+            if (arrivalTime[j] > arrivalTime[j + 1]) {
+                // Swap Arrival Time
+                temp = arrivalTime[j];
+                arrivalTime[j] = arrivalTime[j + 1];
+                arrivalTime[j + 1] = temp;
 
-    for (i = 1; i < n; i++) {
-        if (completionTime[i - 1] >= arrivalTime[i])
-            completionTime[i] = completionTime[i - 1] + burstTime[i];
-        else
-            completionTime[i] = arrivalTime[i] + burstTime[i];
+                // Swap Burst Time
+                temp = burstTime[j];
+                burstTime[j] = burstTime[j + 1];
+                burstTime[j + 1] = temp;
+
+                // Swap Process ID
+                temp = id[j];
+                id[j] = id[j + 1];
+                id[j + 1] = temp;
+            }
+        }
     }
 
-    // Calculate Turnaround Time and Waiting Time
+    // Calculate Completion Time dynamically
+    int currentTime = 0;  // Tracks the CPU time
     for (i = 0; i < n; i++) {
+        if (currentTime < arrivalTime[i]) {  // If CPU is idle
+            currentTime = arrivalTime[i];
+        }
+        completionTime[i] = currentTime + burstTime[i];
+        currentTime = completionTime[i];
+
+        // Calculate Turnaround Time & Waiting Time
         turnAroundTime[i] = completionTime[i] - arrivalTime[i];
         waitingTime[i] = turnAroundTime[i] - burstTime[i];
 
