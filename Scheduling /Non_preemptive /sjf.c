@@ -1,75 +1,86 @@
 #include <stdio.h>
-#include <limits.h>  // Include limits.h for INT_MAX
+#include <limits.h>
 
-// Main function
 int main() {
-    int n;  // Number of processes
+    int n, i, j, temp;
+    int id[20], burstTime[20], waitingTime[20], turnAroundTime[20], completionTime[20], start[20];
+    float arrivalTime[20], totalWaitingTime = 0, totalTurnAroundTime = 0;
+    int completed[20] = {0}, completedCount = 0;
+    float currentTime = 0;
+
     printf("Enter the number of processes: ");
     scanf("%d", &n);
-    
-    // Declaring arrays for storing process details
-    int processes[n], burst_time[n], waiting_time[n], turnaround_time[n], completion_time[n], completed[n], start[n];
-    float arrival_time[n], currentTime = 0;
-    
-    // Taking input: Arrival Time and Burst Time for each process
-    printf("Enter arrival times and burst times for each process:\n");
-    for (int i = 0; i < n; i++) {
-        processes[i] = i + 1;  // Process ID
-        completed[i] = 0;  // Mark process as incomplete
-        
-        printf("Arrival time for Process %d: ", processes[i]);
-        scanf("%f", &arrival_time[i]);
-        
-        printf("Burst time for Process %d: ", processes[i]);
-        scanf("%d", &burst_time[i]);
+
+    // Input process details
+    for (i = 0; i < n; i++) {
+        id[i] = i + 1;
+        printf("\nEnter Arrival Time and Burst Time for Process %d: ", id[i]);
+        scanf("%f %d", &arrivalTime[i], &burstTime[i]);
     }
-    
-    int completedCount = 0;  // Tracks how many processes are completed
-    printf("\nGantt Chart:\n|");  // Gantt Chart Visualization
-    
-    // Scheduling using Shortest Job Next (SJN)
+
+    // Sorting by Arrival Time using Bubble Sort
+    for (i = 0; i < n - 1; i++) {
+        for (j = 0; j < n - i - 1; j++) {
+            if (arrivalTime[j] > arrivalTime[j + 1]) {
+                // Swap Arrival Time
+                float tempFloat = arrivalTime[j];
+                arrivalTime[j] = arrivalTime[j + 1];
+                arrivalTime[j + 1] = tempFloat;
+
+                // Swap Burst Time
+                temp = burstTime[j];
+                burstTime[j] = burstTime[j + 1];
+                burstTime[j + 1] = temp;
+
+                // Swap Process ID
+                temp = id[j];
+                id[j] = id[j + 1];
+                id[j + 1] = temp;
+            }
+        }
+    }
+
+    // Shortest Job Next (SJN) Scheduling
+    printf("\nGantt Chart:\n|");
     while (completedCount < n) {
-        int minIndex = -1;  // Index of the process with the shortest burst time
-        int minBurst = INT_MAX;  // Use INT_MAX instead of a large value
-        
-        // Find the shortest available process
-        for (int i = 0; i < n; i++) {
-            if (!completed[i] && arrival_time[i] <= currentTime && burst_time[i] < minBurst) {
-                minBurst = burst_time[i];
+        int minIndex = -1, minBurst = INT_MAX;
+
+        for (i = 0; i < n; i++) {
+            if (!completed[i] && arrivalTime[i] <= currentTime && burstTime[i] < minBurst) {
+                minBurst = burstTime[i];
                 minIndex = i;
             }
         }
-        
-        // If no process is available, increase the time (CPU is idle)
+
         if (minIndex == -1) {
-            currentTime++;
+            currentTime++; // CPU idle
         } else {
-            // Processing the selected process
             start[minIndex] = currentTime;
-            waiting_time[minIndex] = currentTime - arrival_time[minIndex];  // Waiting time calculation
-            currentTime += burst_time[minIndex];  // Move the time forward
-            completion_time[minIndex] = currentTime;  // Set completion time
-            turnaround_time[minIndex] = burst_time[minIndex] + waiting_time[minIndex];  // Turnaround time calculation
-            completed[minIndex] = 1;  // Mark the process as completed
-            completedCount++;  // Increment completed count
-            
-            // Print process in Gantt Chart
-            printf(" P%d |", processes[minIndex]);
+            waitingTime[minIndex] = currentTime - arrivalTime[minIndex];
+            completionTime[minIndex] = currentTime + burstTime[minIndex];
+            currentTime += burstTime[minIndex];
+
+            turnAroundTime[minIndex] = completionTime[minIndex] - arrivalTime[minIndex];
+            totalWaitingTime += waitingTime[minIndex];
+            totalTurnAroundTime += turnAroundTime[minIndex];
+
+            completed[minIndex] = 1;
+            completedCount++;
+            printf(" P%d |", id[minIndex]);
         }
     }
-    
-    // Display process details in tabular format
-    int total_wt = 0, total_tat = 0;
-    printf("\n\nProcess\tArrival Time\tBurst Time\tWaiting Time\tTurnaround Time\tCompletion Time\n");
-    for (int i = 0; i < n; i++) {
-        total_wt += waiting_time[i];
-        total_tat += turnaround_time[i];
-        printf("%d\t\t%.1f\t\t%d\t\t%d\t\t%d\t\t%d\n", processes[i], arrival_time[i], burst_time[i], waiting_time[i], turnaround_time[i], completion_time[i]);
+    printf("\n");
+
+    // Display Process Details
+    printf("\nProcess\tArrival Time\tBurst Time\tWaiting Time\tTurnaround Time\tCompletion Time\n");
+    for (i = 0; i < n; i++) {
+        printf("%d\t%.1f\t\t%d\t\t%d\t\t%d\t\t%d\n", id[i], arrivalTime[i], burstTime[i], 
+               waitingTime[i], turnAroundTime[i], completionTime[i]);
     }
-    
-    // Calculating and displaying averages
-    printf("\nAverage Waiting Time: %.2f", (float)total_wt / n);
-    printf("\nAverage Turnaround Time: %.2f\n", (float)total_tat / n);
-    
-    return 0;  // Successful execution
+
+    // Display Average Times
+    printf("\nAverage Waiting Time: %.2f", totalWaitingTime / n);
+    printf("\nAverage Turnaround Time: %.2f\n", totalTurnAroundTime / n);
+
+    return 0;
 }
