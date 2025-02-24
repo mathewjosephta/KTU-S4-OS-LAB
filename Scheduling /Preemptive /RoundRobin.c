@@ -1,101 +1,55 @@
 #include <stdio.h>
-#include <string.h>
 
-void main() {
-    int number_of_processes, time_quantum, i, j, completed_processes = 0, current_time = 0;
-    int total_waiting_time = 0, total_turnaround_time = 0;
-    int executed_flag;
-
-    char process_name[10][20]; // Process names (Full names allowed)
-    int burst_time[10], arrival_time[10], waiting_time[10], turnaround_time[10], remaining_time[10];
-
+int main() {
+    int n, quantum, time = 0, completed = 0;
+    int id[20], arrivalTime[20], burstTime[20], remainingTime[20], completionTime[20], turnaroundTime[20], waitingTime[20];
+    float totalTAT = 0, totalWT = 0;
+    
     printf("Enter the number of processes: ");
-    scanf("%d", &number_of_processes);
+    scanf("%d", &n);
 
-    // Input process details
-    for (i = 0; i < number_of_processes; i++) {
-        printf("Enter the process name: ");
-        scanf("%s", process_name[i]);
-        printf("Enter the arrival time: ");
-        scanf("%d", &arrival_time[i]);
-        printf("Enter the burst time: ");
-        scanf("%d", &burst_time[i]);
-        remaining_time[i] = burst_time[i]; // Remaining time initially equals burst time
+    for (int i = 0; i < n; i++) {
+        id[i] = i + 1;
+        printf("\nEnter Arrival Time and Burst Time for Process %d: ", id[i]);
+        scanf("%d %d", &arrivalTime[i], &burstTime[i]);
+        remainingTime[i] = burstTime[i];
     }
 
-    // Input time quantum
-    printf("\nEnter the time quantum: ");
-    scanf("%d", &time_quantum);
+    printf("\nEnter Time Quantum: ");
+    scanf("%d", &quantum);
 
-    // Sorting processes based on arrival time
-    for (i = 0; i < number_of_processes - 1; i++) {
-        for (j = i + 1; j < number_of_processes; j++) {
-            if (arrival_time[i] > arrival_time[j]) {
-                // Swap process names using strcpy()
-                char temp_name[20];
-                strcpy(temp_name, process_name[i]);
-                strcpy(process_name[i], process_name[j]);
-                strcpy(process_name[j], temp_name);
-
-                // Swap numerical values
-                int temp = arrival_time[i];
-                arrival_time[i] = arrival_time[j];
-                arrival_time[j] = temp;
-
-                temp = burst_time[i];
-                burst_time[i] = burst_time[j];
-                burst_time[j] = temp;
-
-                temp = remaining_time[i];
-                remaining_time[i] = remaining_time[j];
-                remaining_time[j] = temp;
-            }
-        }
-    }
-
-    printf("\nGantt Chart:\n");
-    printf("|");
-
-    while (completed_processes < number_of_processes) {
-        executed_flag = 0; // Track if any process ran in this cycle
-
-        for (i = 0; i < number_of_processes; i++) {
-            if (arrival_time[i] <= current_time && remaining_time[i] > 0) {
-                executed_flag = 1; // At least one process executed
-
-                if (remaining_time[i] <= time_quantum) {  
-                    current_time += remaining_time[i];
-                    printf(" %s (%d) |", process_name[i], current_time);
-                    remaining_time[i] = 0;
-                    turnaround_time[i] = current_time - arrival_time[i];
-                    waiting_time[i] = turnaround_time[i] - burst_time[i];
-                    completed_processes++;
-                } else {  
-                    current_time += time_quantum;
-                    remaining_time[i] -= time_quantum;
-                    printf(" %s (%d) |", process_name[i], current_time);
+    while (completed < n) {
+        int executed = 0;
+        for (int i = 0; i < n; i++) {
+            if (remainingTime[i] > 0 && arrivalTime[i] <= time) {
+                if (remainingTime[i] > quantum) {
+                    time += quantum;
+                    remainingTime[i] -= quantum;
+                } else {
+                    time += remainingTime[i];
+                    remainingTime[i] = 0;
+                    completionTime[i] = time;
+                    turnaroundTime[i] = completionTime[i] - arrivalTime[i];
+                    waitingTime[i] = turnaroundTime[i] - burstTime[i];
+                    completed++;
                 }
+                executed = 1;
             }
         }
-
-        // If no process ran, CPU is idle
-        if (!executed_flag) {
-            printf(" Idle (%d) |", current_time);
-            current_time++;
-        }
+        if (!executed) 
+            time++; 
     }
 
-    printf("\n\nProcess Name\tBurst Time\tArrival Time\tWaiting Time\tTurnaround Time\n");
-    for (i = 0; i < number_of_processes; i++) {
-        printf("%s\t\t%d\t\t%d\t\t%d\t\t%d\n", process_name[i], burst_time[i], arrival_time[i], waiting_time[i], turnaround_time[i]);
+    printf("\nID\tAT\tBT\tCT\tTAT\tWT\n");
+    for (int i = 0; i < n; i++) {
+        totalTAT += turnaroundTime[i];
+        totalWT += waitingTime[i];
+        printf("%d\t%d\t%d\t%d\t%d\t%d\n", id[i], arrivalTime[i], burstTime[i], 
+               completionTime[i], turnaroundTime[i], waitingTime[i]);
     }
+    
+    printf("\nAverage Turnaround Time: %.2f", totalTAT / n);
+    printf("\nAverage Waiting Time: %.2f\n", totalWT / n);
 
-    // Calculate and print averages
-    for (i = 0; i < number_of_processes; i++) {
-        total_waiting_time += waiting_time[i];
-        total_turnaround_time += turnaround_time[i];
-    }
-
-    printf("\nAverage Waiting Time = %.2f", (float)total_waiting_time / number_of_processes);
-    printf("\nAverage Turnaround Time = %.2f\n", (float)total_turnaround_time / number_of_processes);
+    return 0;
 }
