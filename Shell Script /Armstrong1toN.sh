@@ -1,5 +1,7 @@
 # Write a Shell Script to Calculate Armstrong numbers between 1 to n
 
+#!/bin/bash
+
 echo -n "Enter the upper limit: "
 read n
 
@@ -7,33 +9,23 @@ echo "Armstrong numbers between 1 and $n are:"
 
 for (( num=1; num<=n; num++ ))
 do
-    temp=$num
-    digits=0
+    digits=${#num}  # Count the number of digits
     sum=0
-
-    # Find number of digits
-    temp2=$temp
-    while [ $temp2 -gt 0 ]
-    do
-        temp2=$((temp2 / 10))
-        digits=$((digits + 1))
-    done
-
-    # Calculate sum of each digit raised to the power of digits
     temp=$num
+
     while [ $temp -gt 0 ]
     do
-        d=$((temp % 10))
-        sum=$(echo "$sum + $d^$digits" | bc)  # Using bc for power calculation
-        temp=$((temp / 10))
+        d=$((temp % 10))   # Get last digit
+        sum=$((sum + d**digits))  # Raise it to power of digits and add to sum
+        temp=$((temp / 10))  # Remove last digit
     done
 
-    # Check if the number is an Armstrong number
     if [ $sum -eq $num ]
     then
         echo $num
     fi
 done
+
 
 
 
