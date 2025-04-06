@@ -4,7 +4,8 @@
 void firstfit(int p_size[], int n, int m_size[], int m) {
     printf("\t\tFIRST FIT \n");
     int m_temp[m];
-    for (int i = 0; i < m; i++) m_temp[i] = m_size[i]; // Copy memory block sizes
+    for (int i = 0; i < m; i++) 
+	    m_temp[i] = m_size[i]; // Copy memory block sizes
     
     for(int i = 0; i < n; i++) {
         int flag = 0;
@@ -27,7 +28,8 @@ void firstfit(int p_size[], int n, int m_size[], int m) {
 void worstfit(int p_size[], int n, int m_size[], int m) {
     printf("\t\tWORST FIT \n");
     int m_temp[m];
-    for (int i = 0; i < m; i++) m_temp[i] = m_size[i]; // Copy memory block sizes
+    for (int i = 0; i < m; i++) 
+	    m_temp[i] = m_size[i]; // Copy memory block sizes
     
     for(int i = 0; i < n; i++) {
         int max = -1, loc = -1;
