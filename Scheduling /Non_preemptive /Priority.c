@@ -1,17 +1,24 @@
 #include <stdio.h>
 
-void input(int n, int id[], int arrivalTime[], int burstTime[], int priority[]) {
-    for (int i = 0; i < n; i++) {
+int main() {
+    int n, i, j, temp, maxPriorityIndex;
+    int id[20], arrivalTime[20], burstTime[20], priority[20];
+    int completionTime[20], turnAroundTime[20], waitingTime[20];
+    float totalTurnAroundTime = 0, totalWaitingTime = 0;
+    int isCompleted[20] = {0};
+
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    for (i = 0; i < n; i++) {
         id[i] = i + 1;
         printf("\nEnter Arrival Time, Burst Time, and Priority for Process %d: ", id[i]);
         scanf("%d %d %d", &arrivalTime[i], &burstTime[i], &priority[i]);
     }
-}
 
-void sortByArrivalTime(int n, int id[], int arrivalTime[], int burstTime[], int priority[]) {
-    int temp;
-    for (int i = 0; i < n - 1; i++) {
-        for (int j = 0; j < n - i - 1; j++) {
+    // Sorting by Arrival Time
+    for (i = 0; i < n - 1; i++) {
+        for (j = 0; j < n - i - 1; j++) {
             if (arrivalTime[j] > arrivalTime[j + 1]) {
                 temp = arrivalTime[j]; arrivalTime[j] = arrivalTime[j + 1]; arrivalTime[j + 1] = temp;
                 temp = burstTime[j]; burstTime[j] = burstTime[j + 1]; burstTime[j + 1] = temp;
@@ -20,12 +27,8 @@ void sortByArrivalTime(int n, int id[], int arrivalTime[], int burstTime[], int 
             }
         }
     }
-}
 
-void calculatePriorityScheduling(int n, int id[], int arrivalTime[], int burstTime[], int priority[],
-                                 int completionTime[], int turnAroundTime[], int waitingTime[],
-                                 int isCompleted[], float totalTurnAroundTime[], float totalWaitingTime[]) {
-    int currentTime = 0, completed = 0, maxPriorityIndex, i;
+    int currentTime = 0, completed = 0;
 
     printf("\nGantt Chart:\n|");
 
@@ -33,7 +36,7 @@ void calculatePriorityScheduling(int n, int id[], int arrivalTime[], int burstTi
         maxPriorityIndex = -1;
         for (i = 0; i < n; i++) {
             if (!isCompleted[i] && arrivalTime[i] <= currentTime) {
-                if (maxPriorityIndex == -1 || priority[i] < priority[maxPriorityIndex]) {
+                if (maxPriorityIndex == -1 || priority[i] < priority[maxPriorityIndex]) {  // Lower value = higher priority
                     maxPriorityIndex = i;
                 }
             }
@@ -48,8 +51,8 @@ void calculatePriorityScheduling(int n, int id[], int arrivalTime[], int burstTi
             turnAroundTime[maxPriorityIndex] = completionTime[maxPriorityIndex] - arrivalTime[maxPriorityIndex];
             waitingTime[maxPriorityIndex] = turnAroundTime[maxPriorityIndex] - burstTime[maxPriorityIndex];
 
-            totalTurnAroundTime[0] += turnAroundTime[maxPriorityIndex];
-            totalWaitingTime[0] += waitingTime[maxPriorityIndex];
+            totalTurnAroundTime += turnAroundTime[maxPriorityIndex];
+            totalWaitingTime += waitingTime[maxPriorityIndex];
 
             isCompleted[maxPriorityIndex] = 1;
             completed++;
@@ -57,41 +60,14 @@ void calculatePriorityScheduling(int n, int id[], int arrivalTime[], int burstTi
             printf(" P%d |", id[maxPriorityIndex]);
         }
     }
-}
 
-void display(int n, int id[], int arrivalTime[], int burstTime[], int priority[],
-             int completionTime[], int turnAroundTime[], int waitingTime[],
-             float totalTurnAroundTime, float totalWaitingTime) {
-    int i;
-    printf("\n\nProcess\tArrival Time\tBurst Time\tPriority\tCompletion Time\tTurnaround Time\tWaiting Time\n");
+    printf("\nProcess\tArrival Time\tBurst Time\tPriority\tCompletion Time\tTurnaround Time\tWaiting Time\n");
     for (i = 0; i < n; i++) {
-        printf("%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n",
-               id[i], arrivalTime[i], burstTime[i], priority[i],
-               completionTime[i], turnAroundTime[i], waitingTime[i]);
+        printf("%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n", id[i], arrivalTime[i], burstTime[i], priority[i], completionTime[i], turnAroundTime[i], waitingTime[i]);
     }
 
     printf("\nAverage Turnaround Time: %.2f", totalTurnAroundTime / n);
     printf("\nAverage Waiting Time: %.2f\n", totalWaitingTime / n);
-}
-
-int main() {
-    int n;
-    int id[20], arrivalTime[20], burstTime[20], priority[20];
-    int completionTime[20], turnAroundTime[20], waitingTime[20];
-    int isCompleted[20] = {0};
-    float totalTurnAroundTime[1] = {0}, totalWaitingTime[1] = {0};
-
-    printf("Enter number of processes: ");
-    scanf("%d", &n);
-
-    input(n, id, arrivalTime, burstTime, priority);
-    sortByArrivalTime(n, id, arrivalTime, burstTime, priority);
-    calculatePriorityScheduling(n, id, arrivalTime, burstTime, priority,
-                                completionTime, turnAroundTime, waitingTime,
-                                isCompleted, totalTurnAroundTime, totalWaitingTime);
-    display(n, id, arrivalTime, burstTime, priority,
-            completionTime, turnAroundTime, waitingTime,
-            totalTurnAroundTime[0], totalWaitingTime[0]);
 
     return 0;
 }
