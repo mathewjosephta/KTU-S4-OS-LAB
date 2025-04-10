@@ -1,82 +1,70 @@
 #include <stdio.h>
 
-void inputProcesses(int n, int id[], int arrivalTime[], int burstTime[]) {
-    for (int i = 0; i < n; i++) {
+int main() {
+    int n, i, j, temp;
+    int id[20], arrivalTime[20], burstTime[20];
+    int completionTime[20], turnAroundTime[20], waitingTime[20];
+    float totalTurnAroundTime = 0, totalWaitingTime = 0;
+
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    // Input process details
+    for (i = 0; i < n; i++) {
         id[i] = i + 1;
         printf("\nEnter Arrival Time and Burst Time for Process %d: ", id[i]);
         scanf("%d %d", &arrivalTime[i], &burstTime[i]);
     }
-}
 
-void sortByArrivalTime(int n, int id[], int arrivalTime[], int burstTime[]) {
-    int temp;
-    for (int i = 0; i < n - 1; i++) {
-        for (int j = 0; j < n - i - 1; j++) {
+    // Sorting by Arrival Time (Bubble Sort inside main)
+    for (i = 0; i < n - 1; i++) {
+        for (j = 0; j < n - i - 1; j++) {
             if (arrivalTime[j] > arrivalTime[j + 1]) {
-                // Swap arrival time
+                // Swap Arrival Time
                 temp = arrivalTime[j];
                 arrivalTime[j] = arrivalTime[j + 1];
                 arrivalTime[j + 1] = temp;
 
-                // Swap burst time
+                // Swap Burst Time
                 temp = burstTime[j];
                 burstTime[j] = burstTime[j + 1];
                 burstTime[j + 1] = temp;
 
-                // Swap process ID
+                // Swap Process ID
                 temp = id[j];
                 id[j] = id[j + 1];
                 id[j + 1] = temp;
             }
         }
     }
-}
 
-void calculateTimes(int n, int arrivalTime[], int burstTime[], int completionTime[],
-                    int turnAroundTime[], int waitingTime[], float *totalTAT, float *totalWT) {
-    int currentTime = 0;
-
-    for (int i = 0; i < n; i++) {
-        if (currentTime < arrivalTime[i]) {
+    // Calculate Completion Time dynamically
+    int currentTime = 0;  // Tracks the CPU time
+    for (i = 0; i < n; i++) {
+        if (currentTime < arrivalTime[i]) {  // If CPU is idle
             currentTime = arrivalTime[i];
         }
-
         completionTime[i] = currentTime + burstTime[i];
         currentTime = completionTime[i];
 
+        // Calculate Turnaround Time & Waiting Time
         turnAroundTime[i] = completionTime[i] - arrivalTime[i];
         waitingTime[i] = turnAroundTime[i] - burstTime[i];
 
-        *totalTAT += turnAroundTime[i];
-        *totalWT += waitingTime[i];
+        totalTurnAroundTime += turnAroundTime[i];
+        totalWaitingTime += waitingTime[i];
     }
-}
 
-void displayResults(int n, int id[], int arrivalTime[], int burstTime[], int completionTime[],
-                    int turnAroundTime[], int waitingTime[], float totalTAT, float totalWT) {
+    // Display Results
     printf("\nProcess\tArrival Time\tBurst Time\tCompletion Time\tTurnaround Time\tWaiting Time\n");
-    for (int i = 0; i < n; i++) {
+    for (i = 0; i < n; i++) {
         printf("%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n", id[i], arrivalTime[i], burstTime[i],
                completionTime[i], turnAroundTime[i], waitingTime[i]);
     }
 
-    printf("\nAverage Turnaround Time: %.2f", totalTAT / n);
-    printf("\nAverage Waiting Time: %.2f\n", totalWT / n);
-}
-
-int main() {
-    int n;
-    int id[20], arrivalTime[20], burstTime[20];
-    int completionTime[20], turnAroundTime[20], waitingTime[20];
-    float totalTAT = 0, totalWT = 0;
-
-    printf("Enter number of processes: ");
-    scanf("%d", &n);
-
-    inputProcesses(n, id, arrivalTime, burstTime);
-    sortByArrivalTime(n, id, arrivalTime, burstTime);
-    calculateTimes(n, arrivalTime, burstTime, completionTime, turnAroundTime, waitingTime, &totalTAT, &totalWT);
-    displayResults(n, id, arrivalTime, burstTime, completionTime, turnAroundTime, waitingTime, totalTAT, totalWT);
+    // Display Average Times
+    printf("\nAverage Turnaround Time: %.2f", totalTurnAroundTime / n);
+    printf("\nAverage Waiting Time: %.2f\n", totalWaitingTime / n);
 
     return 0;
 }
